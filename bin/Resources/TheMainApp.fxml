@@ -218,7 +218,7 @@
                   </Label>
                </children>
             </Pane>
-            <TableView fx:id="TableViewSchoolFees" layoutX="47.0" layoutY="195.0" prefHeight="251.0" prefWidth="494.0" styleClass="border" stylesheets="@../css/MainAppScene.css">
+            <TableView fx:id="TableViewSchoolFees" layoutX="47.0" layoutY="195.0" onMouseClicked="#SelectSchoolFees" prefHeight="251.0" prefWidth="494.0" styleClass="border" stylesheets="@../css/MainAppScene.css">
               <columns>
                   <TableColumn fx:id="IdSchoolFeesCol" prefWidth="132.0" resizable="false" text="Numero de Facture" />
                 <TableColumn fx:id="datePaymentCol" prefWidth="182.39996337890625" resizable="false" text="Date de payement" />
@@ -229,8 +229,8 @@
                </columnResizePolicy>
             </TableView>
             <Button fx:id="buttonaddSchoolFees" layoutX="476.0" layoutY="467.0" mnemonicParsing="false" onAction="#AddNewSchoolFees" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="Nouveau" />
-            <Button fx:id="buttonDeleteSchoolFees" layoutX="52.0" layoutY="467.0" mnemonicParsing="false" onAction="#DeleteSchoolFees" style="-fx-background-color: red;" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="Supprimer" textFill="WHITE" />
-            <Button fx:id="buttonModifySchoolfees" layoutX="143.0" layoutY="467.0" mnemonicParsing="false" onAction="#ModifySchoolFees" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="Modifier" />
+            <Button fx:id="buttonDeleteSchoolFees" disable="true" layoutX="52.0" layoutY="467.0" mnemonicParsing="false" onAction="#DeleteSchoolFees" style="-fx-background-color: red;" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="Supprimer" textFill="WHITE" />
+            <Button fx:id="buttonModifySchoolfees" disable="true" layoutX="143.0" layoutY="467.0" mnemonicParsing="false" onAction="#ModifySchoolFees" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="Modifier" />
          </children>
       </AnchorPane>
       <AnchorPane fx:id="schoolFeesForm" layoutX="292.0" layoutY="187.0" prefHeight="294.0" prefWidth="587.0" stylesheets="@../css/MainAppScene.css" visible="false">
@@ -245,7 +245,7 @@
                   <Image url="@images/R.png" />
                </image>
             </ImageView>
-            <Label alignment="CENTER" layoutY="-21.0" prefHeight="55.0" prefWidth="358.0" snapToPixel="false" style="-fx-background-color: #222f3e;" styleClass="radius" stylesheets="@../css/MainAppScene.css" text="ENREGISTREMENT DES FRAIS" textFill="WHITE">
+            <Label fx:id="labelTitleFees" alignment="CENTER" layoutY="-21.0" prefHeight="55.0" prefWidth="358.0" snapToPixel="false" style="-fx-background-color: #222f3e;" styleClass="radius" stylesheets="@../css/MainAppScene.css" text="ENREGISTREMENT DES FRAIS" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="24.0" />
                </font>
@@ -258,7 +258,7 @@
                   <Font size="20.0" />
                </font>
             </Label>
-            <TextField layoutX="281.0" layoutY="168.0" prefHeight="36.0" prefWidth="271.0" promptText="Montant en Ariary" styleClass="input" stylesheets="@../css/MainAppScene.css" />
+            <TextField fx:id="tfAmount" layoutX="281.0" layoutY="168.0" prefHeight="36.0" prefWidth="271.0" promptText="Montant en Ariary" styleClass="input" stylesheets="@../css/MainAppScene.css" />
             <Button layoutX="440.0" layoutY="233.0" mnemonicParsing="false" onAction="#RegisterSchoolFees" prefHeight="46.0" prefWidth="122.0" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="Enregister">
                <cursor>
                   <Cursor fx:constant="HAND" />
@@ -270,13 +270,21 @@
                </cursor>
             </Button>
             <Label layoutX="14.0" layoutY="69.0" text="Nom de l'etudiant :" />
-            <Label layoutX="14.0" layoutY="96.0" text="Prenom de l'etudIant ;" />
+            <Label layoutX="14.0" layoutY="96.0" text="Prenom de l'etudIant :" />
             <Label layoutX="14.0" layoutY="41.0" text="Id de l'etudiant :" />
-            <Label layoutX="498.0" layoutY="14.0" text="Niveau : " />
-            <Label layoutX="116.0" layoutY="41.0" text="1" />
-            <Label layoutX="129.0" layoutY="69.0" text="Par defaut" />
-            <Label layoutX="143.0" layoutY="96.0" text="User par defaut" />
-            <Label layoutX="548.0" layoutY="14.0" text="L1G1" />
+            <Label layoutX="478.0" layoutY="14.0" text="Niveau : " />
+            <Label fx:id="lbIdStudent" layoutX="116.0" layoutY="41.0" text="1" />
+            <Label fx:id="lbNameStudent" layoutX="129.0" layoutY="69.0" text="Par defaut">
+               <font>
+                  <Font name="Arial Bold" size="12.0" />
+               </font></Label>
+            <Label fx:id="lbFirstnameStudent" layoutX="143.0" layoutY="96.0" text="User par defaut" />
+            <Label fx:id="lbClassRankStudent" layoutX="524.0" layoutY="14.0" text="L1G1" />
+            <Label layoutX="547.0" layoutY="172.0" prefHeight="30.0" prefWidth="46.0" text="Ar">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Label>
          </children>
       </AnchorPane>
    </children>

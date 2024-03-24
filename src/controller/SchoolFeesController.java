@@ -55,4 +55,52 @@ public class SchoolFeesController {
             return null;
         }
     }
+
+    public void RegisterSchoolFees(int amount, Date paymentDate, int idStudent) {
+        try {
+            String sql = "INSERT INTO school_fees (paymentDate , amount , idStudent) VALUES (? , ? , ?)";
+
+            preparedStatement = cnx.prepareStatement(sql);
+
+            preparedStatement.setDate(1, paymentDate);
+
+            preparedStatement.setInt(2, amount);
+
+            preparedStatement.setInt(3, idStudent);
+
+            preparedStatement.executeUpdate();
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void DeleteSchoolFees(int idSchoolFees) {
+        try {
+            String sql = "DELETE FROM school_fees WHERE IdSchoolFees = ?";
+
+            preparedStatement = cnx.prepareStatement(sql);
+
+            preparedStatement.setInt(1, idSchoolFees);
+
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void UpdateSchoolFees(int amount, int idSchoolFees) {
+        try {
+            String sql = "UPDATE school_fees SET amount = ? WHERE idSchoolFees = ?";
+
+            preparedStatement = cnx.prepareStatement(sql);
+
+            preparedStatement.setInt(1, amount);
+            preparedStatement.setInt(2, idSchoolFees);
+
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

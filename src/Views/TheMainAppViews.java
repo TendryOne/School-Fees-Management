@@ -2,7 +2,10 @@ package Views;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Date;
+import java.util.Calendar;
+import java.util.Optional;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 import Model.SchoolFees;
@@ -18,7 +21,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -34,7 +40,9 @@ import javafx.stage.Stage;
 public class TheMainAppViews implements Initializable {
     Student student;
     Integer index;
+    int indexSchoolFees;
     Boolean UPDATE = false;
+    Boolean UPDATEFEES = false;
     SchoolFees SchoolFees;
 
     StudentController studentController = new StudentController(student);
@@ -42,7 +50,8 @@ public class TheMainAppViews implements Initializable {
 
     private String login;
     @FXML
-    private Label labelLogin, titleAddLabel, labelClassRank, labelFirstname, labelId, labelName;
+    private Label labelLogin, titleAddLabel, labelClassRank, labelFirstname, labelId, labelName, lbNameStudent,
+            lbFirstnameStudent, lbClassRankStudent, lbIdStudent, labelTitleFees;
 
     @FXML
     private TableColumn<Student, String> firstnameStudentCol;
@@ -64,7 +73,7 @@ public class TheMainAppViews implements Initializable {
 
     @FXML
     private Button linktoAddStudent, linktoStudentList, DeleteStudentButton, UpdateStudentButton, buttonAdd,
-            schoolFeesStudentButton;
+            schoolFeesStudentButton, buttonModifySchoolfees, buttonDeleteSchoolFees;
 
     @FXML
     private AnchorPane studentContainer;
@@ -76,7 +85,7 @@ public class TheMainAppViews implements Initializable {
     private TextField tfFirstname;
 
     @FXML
-    private TextField tfName;
+    private TextField tfName, tfAmount;
 
     @FXML
     private ComboBox<String> comboList;
@@ -113,6 +122,14 @@ public class TheMainAppViews implements Initializable {
     @FXML
     public void SetLabelLogin(String login) {
         labelLogin.setText(login);
+    }
+
+    void showAlertAndWait(AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait(); // Cette ligne est bloquante
     }
 
     @FXML
@@ -226,11 +243,23 @@ public class TheMainAppViews implements Initializable {
     @FXML
     void DeleteStudent(ActionEvent event) {
         studentController.DeleteStudent(idStudentCol.getCellData(index));
-        StudentList = RefreshList();
-        tableViewStudent.setItems(StudentList);
-        DeleteStudentButton.setDisable(true);
-        UpdateStudentButton.setDisable(true);
-        schoolFeesStudentButton.setDisable(true);
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation de suppression");
+        alert.setHeaderText(null);
+        alert.setContentText(
+                "Vous allez perdre les donnees de frais de scolarite de cet etudiant , Voulez vous continuer la suppression ?");
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            StudentList = RefreshList();
+            tableViewStudent.setItems(StudentList);
+            DeleteStudentButton.setDisable(true);
+            UpdateStudentButton.setDisable(true);
+            schoolFeesStudentButton.setDisable(true);
+        } else {
+            return;
+        }
+
     }
 
     ObservableList<SchoolFees> SchoolFeesList = FXCollections.observableArrayList();
@@ -238,6 +267,13 @@ public class TheMainAppViews implements Initializable {
     public ObservableList<SchoolFees> RefreshListFees(Integer idStudent) {
         SchoolFeesList.clear();
         SchoolFeesList = schoolFeesController.GetSchoolFeesByStudentId(idStudent);
+        if (!SchoolFeesList.isEmpty()) {
+            datePaymentCol.setCellValueFactory(new PropertyValueFactory<>("paymentDate"));
+            amountCol.setCellValueFactory(new PropertyValueFactory<>("amount"));
+            IdSchoolFeesCol.setCellValueFactory(new PropertyValueFactory<>("idSchoolFees"));
+
+            TableViewSchoolFees.setItems(SchoolFeesList);
+        }
         return SchoolFeesList;
     }
 
@@ -264,18 +300,34 @@ public class TheMainAppViews implements Initializable {
 
     @FXML
     void ModifySchoolFees(ActionEvent event) {
+        UPDATEFEES = true;
+        tfAmount.setText(amountCol.getCellData(indexSchoolFees).toString());
 
+        schoolFeesForm.setVisible(true);
+        schoolFeesContainer.setVisible(false);
+        lbClassRankStudent.setText(labelClassRank.getText());
+        lbFirstnameStudent.setText(labelFirstname.getText());
+        lbNameStudent.setText(labelName.getText());
+        lbIdStudent.setText(labelId.getText());
+        labelTitleFees.setText("MODIFICATION DES FRAIS");
     }
 
     @FXML
     void DeleteSchoolFees(ActionEvent event) {
-
+        schoolFeesController.DeleteSchoolFees(IdSchoolFeesCol.getCellData(indexSchoolFees));
+        RefreshListFees(idStudentCol.getCellData(index));
+        buttonDeleteSchoolFees.setDisable(true);
+        buttonModifySchoolfees.setDisable(true);
     }
 
     @FXML
     void AddNewSchoolFees(ActionEvent event) {
         schoolFeesForm.setVisible(true);
         schoolFeesContainer.setVisible(false);
+        lbClassRankStudent.setText(labelClassRank.getText());
+        lbFirstnameStudent.setText(labelFirstname.getText());
+        lbNameStudent.setText(labelName.getText());
+        lbIdStudent.setText(labelId.getText());
 
     }
 
@@ -283,12 +335,78 @@ public class TheMainAppViews implements Initializable {
     void CloseSchoolFeesRegister(ActionEvent event) {
         schoolFeesForm.setVisible(false);
         schoolFeesContainer.setVisible(true);
+
     }
 
     @FXML
 
     void RegisterSchoolFees(ActionEvent event) {
 
+        LocalDate currentDate = LocalDate.now();
+        Date date = Date.valueOf(currentDate);
+
+        if (tfAmount.getText().matches("\\d+")) {
+            int amount = Integer.parseInt(tfAmount.getText());
+            int idStudent = Integer.parseInt(lbIdStudent.getText());
+            if (UPDATEFEES == false) {
+
+                schoolFeesController.RegisterSchoolFees(amount, date, idStudent);
+
+                SchoolFeesList = RefreshListFees(idStudent);
+                TableViewSchoolFees.setItems(SchoolFeesList);
+
+                String message = "Les frais de scolarite de " + lbNameStudent.getText() + " "
+                        + lbFirstnameStudent.getText()
+                        + " ont ete enregistre avec succes";
+
+                showAlert(AlertType.INFORMATION, "Frais de scolarite", message);
+                schoolFeesForm.setVisible(false);
+                schoolFeesContainer.setVisible(true);
+                tfAmount.setText("");
+
+            } else {
+                System.out.println();
+                schoolFeesController.UpdateSchoolFees(amount, IdSchoolFeesCol.getCellData(indexSchoolFees));
+
+                SchoolFeesList = RefreshListFees(idStudent);
+                TableViewSchoolFees.setItems(SchoolFeesList);
+
+                String message = "Les frais de scolarite de " + lbNameStudent.getText() + " "
+                        + lbFirstnameStudent.getText()
+                        + " ont ete modifie avec succes";
+
+                showAlert(AlertType.INFORMATION, "Frais de scolarite", message);
+                schoolFeesForm.setVisible(false);
+                schoolFeesContainer.setVisible(true);
+                tfAmount.setText("");
+                UPDATEFEES = false;
+            }
+
+            buttonDeleteSchoolFees.setDisable(true);
+            buttonModifySchoolfees.setDisable(true);
+
+        } else {
+            showAlert(AlertType.ERROR, "Erreur", "Veuillez entrer un montant exacte !!");
+        }
+
+    }
+
+    @FXML
+    void SelectSchoolFees(MouseEvent event) {
+        indexSchoolFees = TableViewSchoolFees.getSelectionModel().getSelectedIndex();
+        if (index >= 0) {
+            buttonModifySchoolfees.setDisable(false);
+            buttonDeleteSchoolFees.setDisable(false);
+        }
+
+    }
+
+    public static void showAlert(AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
 }
