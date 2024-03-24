@@ -15,6 +15,8 @@ import controller.StudentController;
 import controller.TheMainAppController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -66,7 +68,7 @@ public class TheMainAppViews implements Initializable {
     private TableColumn<Student, String> rankStudentCol;
 
     @FXML
-    private TableView<?> tableViewStudent;
+    private TableView<Student> tableViewStudent;
 
     @FXML
     private AnchorPane schoolFeesForm;
@@ -85,7 +87,7 @@ public class TheMainAppViews implements Initializable {
     private TextField tfFirstname;
 
     @FXML
-    private TextField tfName, tfAmount;
+    private TextField tfName, tfAmount, tfFilterSearch;
 
     @FXML
     private ComboBox<String> comboList;
@@ -129,7 +131,7 @@ public class TheMainAppViews implements Initializable {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
-        alert.showAndWait(); // Cette ligne est bloquante
+        alert.showAndWait();
     }
 
     @FXML
@@ -163,6 +165,7 @@ public class TheMainAppViews implements Initializable {
     ObservableList StudentList = FXCollections.observableArrayList();
     ObservableList comboObsList = FXCollections.observableArrayList("L1G1", "L1G2", "L2IDEV", "L2RSI", "L3IDEV",
             "L3RSI", "M1IDEV", "M1RSI", "M2IDEV", "M2RSI");
+    FilteredList<Student> filteredList;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -172,14 +175,34 @@ public class TheMainAppViews implements Initializable {
         firstnameStudentCol.setCellValueFactory(new PropertyValueFactory<>("firstname"));
         rankStudentCol.setCellValueFactory(new PropertyValueFactory<>("classRank"));
         comboList.setItems(comboObsList);
-        ;
 
-        tableViewStudent.setItems(StudentList);
+        filteredList = new FilteredList<>(StudentList);
+        // Ajout d'un listener sur le champ de texte pour mettre à jour le filtre
+        // lorsqu'il change
+        tfFilterSearch.textProperty().addListener((observable, oldValue, newValue) -> {
+            filteredList.setPredicate(student -> {
+                // Si le champ de texte est vide ou la donnée correspond au filtre, la garder
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+                String lowerCaseFilter = newValue.toLowerCase();
+                return student.getFirstname().toLowerCase().contains(lowerCaseFilter)
+                        || student.getName().toLowerCase().contains(lowerCaseFilter);
+            });
+            buttonAdd.setDisable(true);
+            DeleteStudentButton.setDisable(true);
+            UpdateStudentButton.setDisable(true);
+            schoolFeesStudentButton.setDisable(true);
+            tableViewStudent.getSelectionModel().clearSelection();
+        });
+
+        tableViewStudent.setItems(filteredList);
     }
 
     public ObservableList<Student> RefreshList() {
         StudentList.clear();
         StudentList = studentController.GetStudent();
+        filteredList = new FilteredList<>(StudentList);
         return StudentList;
     }
 
@@ -196,7 +219,7 @@ public class TheMainAppViews implements Initializable {
             linktoAddStudent.getStyleClass().remove("button-active");
             linktoStudentList.getStyleClass().add("button-active");
             studentContainer.setVisible(true);
-            tableViewStudent.setItems(StudentList);
+            tableViewStudent.setItems(filteredList);
             SchoolFeesList.clear();
         } else {
             studentController.UpdateStudent(idStudentCol.getCellData(index), tfName.getText(), tfFirstname.getText(),
@@ -209,7 +232,7 @@ public class TheMainAppViews implements Initializable {
             linktoAddStudent.getStyleClass().remove("button-active");
             linktoStudentList.getStyleClass().add("button-active");
             studentContainer.setVisible(true);
-            tableViewStudent.setItems(StudentList);
+            tableViewStudent.setItems(filteredList);
 
             UPDATE = false;
         }
@@ -252,7 +275,7 @@ public class TheMainAppViews implements Initializable {
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
             StudentList = RefreshList();
-            tableViewStudent.setItems(StudentList);
+            tableViewStudent.setItems(filteredList);
             DeleteStudentButton.setDisable(true);
             UpdateStudentButton.setDisable(true);
             schoolFeesStudentButton.setDisable(true);
