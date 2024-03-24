@@ -432,4 +432,19 @@ public class TheMainAppViews implements Initializable {
         alert.showAndWait();
     }
 
+    @FXML
+    void GetPdfOfStudent(ActionEvent event) {
+        showAlert(AlertType.INFORMATION, "PDF", "Votre fichier pdf a ete cree");
+        studentController.GetPDF();
+    }
+
+    @FXML
+    void GetPdfStudentFees(ActionEvent event) {
+        String name = nameStudentCol.getCellData(index).toString() + " "
+                + firstnameStudentCol.getCellData(index).toString();
+        schoolFeesController.GetPDF(idStudentCol.getCellData(index), name);
+        showAlert(AlertType.INFORMATION, "PDF", "Votre fichier pdf a ete cree");
+
+    }
+
 }

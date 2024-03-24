@@ -98,6 +98,7 @@
                   <Cursor fx:constant="HAND" />
                </cursor>
             </Button>
+            <Button layoutX="14.0" layoutY="498.0" mnemonicParsing="false" onAction="#GetPdfOfStudent" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="PDF" />
          </children>
       </AnchorPane>
       <Pane layoutX="223.0" prefHeight="27.0" prefWidth="708.0" styleClass="right-anchor" stylesheets="@../css/MainAppScene.css">
@@ -226,6 +227,7 @@
             <Button fx:id="buttonaddSchoolFees" layoutX="476.0" layoutY="467.0" mnemonicParsing="false" onAction="#AddNewSchoolFees" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="Nouveau" />
             <Button fx:id="buttonDeleteSchoolFees" disable="true" layoutX="52.0" layoutY="467.0" mnemonicParsing="false" onAction="#DeleteSchoolFees" style="-fx-background-color: red;" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="Supprimer" textFill="WHITE" />
             <Button fx:id="buttonModifySchoolfees" disable="true" layoutX="143.0" layoutY="467.0" mnemonicParsing="false" onAction="#ModifySchoolFees" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="Modifier" />
+            <Button layoutX="222.0" layoutY="467.0" mnemonicParsing="false" onAction="#GetPdfStudentFees" styleClass="button-add" stylesheets="@../css/MainAppScene.css" text="PDF" />
          </children>
       </AnchorPane>
       <AnchorPane fx:id="schoolFeesForm" layoutX="292.0" layoutY="187.0" prefHeight="294.0" prefWidth="587.0" stylesheets="@../css/MainAppScene.css" visible="false">

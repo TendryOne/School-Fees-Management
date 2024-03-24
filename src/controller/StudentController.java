@@ -1,10 +1,20 @@
 package controller;
 
+import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Font.FontFamily;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import Model.Student;
 import database.Database;
@@ -42,36 +52,90 @@ public class StudentController {
 
     public ObservableList<Student> GetStudent() {
         try {
-
-            ObservableList studentList = FXCollections.observableArrayList();
+            ObservableList<Student> studentList = FXCollections.observableArrayList();
 
             String sql = "SELECT * FROM student";
 
             preparedStatement = cnx.prepareStatement(sql);
+            ResultSet result = preparedStatement.executeQuery();
 
-            result = preparedStatement.executeQuery();
+            while (result.next()) {
+                int id = result.getInt("idStudent");
+                String name = result.getString("name");
+                String firstName = result.getString("firstname");
+                String classe = result.getString("classRank");
 
-            if (result != null) {
-                while (result.next()) {
-                    Student studentData = new Student();
+                Student studentData = new Student();
+                studentData.setIdStudent(id);
+                studentData.setName(name);
+                studentData.setFirstname(firstName);
+                studentData.setClassRank(classe);
+                studentList.add(studentData);
 
-                    studentData.setIdStudent(result.getInt("idStudent"));
-                    studentData.setName(result.getString("name"));
-                    studentData.setFirstname(result.getString("firstname"));
-                    studentData.setClassRank(result.getString("classRank"));
-                    studentList.add(studentData);
-
-                }
-
-                return studentList;
-
-            } else {
-                return null;
             }
 
+            return studentList;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return null;
+        }
+    }
+
+    public void GetPDF() {
+        try {
+
+            String sql = "SELECT * FROM student";
+
+            preparedStatement = cnx.prepareStatement(sql);
+            ResultSet result = preparedStatement.executeQuery();
+
+            String pdfFilename = "Liste des etudiants.pdf";
+            Document document = new Document(PageSize.A4.rotate());
+            PdfWriter.getInstance(document, new FileOutputStream(pdfFilename));
+            document.open();
+
+            Font boldFont = new Font(FontFamily.HELVETICA, 12, Font.BOLD);
+
+            PdfPTable table = new PdfPTable(4);
+            table.addCell(new Phrase("Id de l'etudiant", boldFont));
+            table.addCell(new Phrase("Nom", boldFont));
+            table.addCell(new Phrase("Prenom", boldFont));
+            table.addCell(new Phrase("Classe", boldFont));
+
+            int lastId = -1;
+            String lastName = "";
+            String lastFirstName = "";
+            String lastClass = "";
+
+            while (result.next()) {
+                int id = result.getInt("idStudent");
+                String name = result.getString("name");
+                String firstName = result.getString("firstname");
+                String classe = result.getString("classRank");
+
+                if (id == lastId && name.equals(lastName) && firstName.equals(lastFirstName)
+                        && classe.equals(lastClass)) {
+
+                    continue;
+                }
+
+                table.addCell(String.valueOf(id));
+                table.addCell(name);
+                table.addCell(firstName);
+                table.addCell(classe);
+
+                lastId = id;
+                lastName = name;
+                lastFirstName = firstName;
+                lastClass = classe;
+            }
+
+            document.add(table);
+            document.close();
+            System.out.println("PDF created successfully.");
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 
